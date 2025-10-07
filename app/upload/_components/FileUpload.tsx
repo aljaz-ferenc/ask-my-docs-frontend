@@ -6,7 +6,6 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
 import { cn, formatBytes } from "@/lib/utils";
 
 const ErrorMessageMap = {

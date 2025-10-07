@@ -3,10 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Document } from "@langchain/core/documents";
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { type NextRequest, NextResponse } from "next/server";
+import { addDocsToDB } from "@/app/_vectorStore/chromaDB";
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,33 +56,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-
-    const chunks = await textSplitter.splitDocuments(docs);
-
-    const embeddingModel = new OpenAIEmbeddings({
-      model: "text-embedding-3-small",
-    });
-    const res = await embeddingModel.embedDocuments(
-      chunks.map((chunk) => chunk.pageContent),
-    );
-
-    const vectorStore = new MemoryVectorStore(embeddingModel);
-
-    await vectorStore.addVectors(res, chunks);
-
-    const query = "What do we need to pack?";
-
-    const results: Document[] = await vectorStore.similaritySearch(query);
-    console.log("RESULT: ", results);
+    await addDocsToDB(docs);
 
     return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (err) {
+    console.error(err);
     return NextResponse.json(
-      { message: `Something went wrong uploading files: ${err}` },
+      { message: `Something went wrong uploading files. Please try again.` },
       { status: 500 },
     );
   }
