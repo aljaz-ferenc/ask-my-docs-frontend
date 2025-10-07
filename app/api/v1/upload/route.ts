@@ -5,6 +5,7 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Document } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -64,14 +65,21 @@ export async function POST(req: NextRequest) {
 
     const chunks = await textSplitter.splitDocuments(docs);
 
-    const embeddings = new OpenAIEmbeddings({
+    const embeddingModel = new OpenAIEmbeddings({
       model: "text-embedding-3-small",
     });
-    const res = await embeddings.embedDocuments(
+    const res = await embeddingModel.embedDocuments(
       chunks.map((chunk) => chunk.pageContent),
     );
 
-    console.log(res);
+    const vectorStore = new MemoryVectorStore(embeddingModel);
+
+    await vectorStore.addVectors(res, chunks);
+
+    const query = "What do we need to pack?";
+
+    const results: Document[] = await vectorStore.similaritySearch(query);
+    console.log("RESULT: ", results);
 
     return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (err) {
