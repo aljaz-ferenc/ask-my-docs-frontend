@@ -2,7 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-import type { Document } from "@langchain/core/documents";
+import { Document } from "@langchain/core/documents";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const docs = [];
+    const docs: Document[] = [];
 
     for (const file of files) {
       // store file temporary
@@ -46,16 +47,21 @@ export async function POST(req: NextRequest) {
       }
 
       if (file.name.endsWith(".txt")) {
-        const textDoc: Document = {
+        const textDoc = new Document({
           pageContent: await file.text(),
           metadata: { source: file.name, id: crypto.randomUUID() },
-        };
+        });
 
         docs.push(textDoc);
       }
-
-      console.log(docs[0]);
     }
+
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 200,
+    });
+
+    const chunks = await textSplitter.splitDocuments(docs);
 
     return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (err) {
