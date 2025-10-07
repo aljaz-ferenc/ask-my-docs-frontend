@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { Document } from "@langchain/core/documents";
+import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -62,6 +63,15 @@ export async function POST(req: NextRequest) {
     });
 
     const chunks = await textSplitter.splitDocuments(docs);
+
+    const embeddings = new OpenAIEmbeddings({
+      model: "text-embedding-3-small",
+    });
+    const res = await embeddings.embedDocuments(
+      chunks.map((chunk) => chunk.pageContent),
+    );
+
+    console.log(res);
 
     return NextResponse.json({ message: "success" }, { status: 200 });
   } catch (err) {
