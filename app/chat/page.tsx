@@ -1,13 +1,16 @@
 "use client";
 
 import { SendHorizontal } from "lucide-react";
-import { useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { useEffect, useState } from "react";
+import { animateScroll } from "react-scroll";
+import { BeatLoader } from "react-spinners";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
+import AIMessage from "@/app/chat/_components/AIMessage";
+import HumanMessage from "@/app/chat/_components/HumanMessage";
 import { queryRAG } from "@/lib/actions";
 
 export default function ChatPage() {
-  const [developerMode, setDeveloperMode] = useState(false);
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
@@ -32,89 +35,54 @@ export default function ChatPage() {
     }
   }
 
-  return (
-    <main className="h-screen container flex flex-col gap-3">
-      <header className="w-full p-3">
-        <label
-          htmlFor="devMode"
-          className="flex items-center gap-2 ml-auto justify-end"
-        >
-          Developer Mode
-          <Switch
-            id="devMode"
-            checked={developerMode}
-            onCheckedChange={setDeveloperMode}
-          />
-        </label>
-      </header>
-      <hr />
-      <div className="h-full flex flex-col gap-10">
-        {messages.map((message, index) => {
-          if (message.role === "user") {
-            return <UserMessage message={message} key={`${index + 1}`} />;
-          }
+  useEffect(() => {
+    if (!messages) return;
+    animateScroll.scrollToBottom({
+      containerId: "messagesContainer",
+      duration: 300,
+      smooth: true,
+    });
+  }, [messages]);
 
-          return <AssistantMessage message={message} key={`${index + 1}`} />;
-        })}
-        {isThinking && <div>Thinking...</div>}
+  return (
+    <main className="h-screen flex flex-col gap-3 pb-5">
+      <header className="w-full p-3"></header>
+      <hr />
+      <div className="h-full overflow-y-auto" id="messagesContainer">
+        <div className="max-w-3xl w-full mx-auto flex flex-col gap-10 ">
+          <AnimatePresence>
+            {messages.map((message, index) => {
+              if (message.role === "user") {
+                return <HumanMessage message={message} key={`${index + 1}`} />;
+              }
+
+              return <AIMessage message={message} key={`${index + 1}`} />;
+            })}
+          </AnimatePresence>
+          {isThinking && <BeatLoader color="var(--color-muted-foreground)" />}
+        </div>
       </div>
-      <div className=" mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSendMessage(userMessage);
+        }}
+        className="max-w-3xl w-full mx-auto mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14"
+      >
         <input
           className="w-full border-none outline-none focus-visible:!border-none focus-visible:!outline-none focus-visible:!shadow-none focus-visible:!ring-none"
           placeholder="Ask about your docs..."
           onChange={(e) => setUserMessage(e.target.value)}
           value={userMessage}
+          disabled={isThinking}
         />
         <button
-          type="button"
+          type="submit"
           className="hover:bg-primary/80 cursor-pointer bg-primary text-white h-[60%] aspect-square grid place-items-center rounded-full"
-          onClick={() => onSendMessage(userMessage)}
         >
           <SendHorizontal size={18} />
         </button>
-      </div>
+      </form>
     </main>
-  );
-}
-
-type UserMessage = {
-  role: string;
-  content: string;
-};
-
-type UserMessageProps = {
-  message: UserMessage;
-};
-
-function UserMessage({ message }: UserMessageProps) {
-  return (
-    <div className="w-fit max-w-[80%] flex flex-col gap-1 self-end">
-      <span className="text-xs self-end text-muted-foreground">You</span>
-      <div className="text-white bg-primary  py-2 px-4 rounded-xl">
-        {message.content}
-      </div>
-    </div>
-  );
-}
-
-type AssistantMessage = {
-  role: string;
-  content: string;
-};
-
-type AssistantMessageProps = {
-  message: AssistantMessage;
-};
-
-function AssistantMessage({ message }: AssistantMessageProps) {
-  return (
-    <div className="w-fit max-w-[80%] flex flex-col gap-1 self-start">
-      <span className="text-xs self-start text-muted-foreground">
-        Assistant
-      </span>
-      <div className="text-white py-2 px-4 bg-slate-700 rounded-xl">
-        {message.content}
-      </div>
-    </div>
   );
 }
