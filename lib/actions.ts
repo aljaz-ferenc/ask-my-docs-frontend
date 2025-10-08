@@ -1,13 +1,18 @@
 "use server";
 
+import type { AIMessage, HumanMessage } from "@/lib/types";
+
 type QueryResult = {
   results: { text: string; metadata: { source: string }; score: number }[];
   llm_response: string;
 };
 
-export async function queryRAG(query: string) {
+export async function queryRAG(
+  query: string,
+  recentMessages: (AIMessage | HumanMessage)[],
+) {
   const res = await fetch("http://localhost:8000/query", {
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, recentMessages }),
     headers: {
       "Content-Type": "application/json",
     },

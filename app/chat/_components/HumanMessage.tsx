@@ -1,12 +1,8 @@
 import { motion } from "motion/react";
-
-type HumanMessage = {
-  role: string;
-  content: string;
-};
+import type { HumanMessage as THumanMessage } from "@/lib/types";
 
 type HumanMessageProps = {
-  message: HumanMessage;
+  message: THumanMessage;
 };
 
 export default function HumanMessage({ message }: HumanMessageProps) {

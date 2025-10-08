@@ -9,11 +9,13 @@ import { toast } from "sonner";
 import AIMessage from "@/app/chat/_components/AIMessage";
 import HumanMessage from "@/app/chat/_components/HumanMessage";
 import { queryRAG } from "@/lib/actions";
+import type {
+  AIMessage as TAIMessage,
+  HumanMessage as THumanMessage,
+} from "@/lib/types";
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<
-    { role: "user" | "assistant"; content: string }[]
-  >([]);
+  const [messages, setMessages] = useState<(TAIMessage | THumanMessage)[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isThinking, setIsThinking] = useState(false);
 
@@ -22,7 +24,8 @@ export default function ChatPage() {
     setUserMessage("");
     try {
       setIsThinking(true);
-      const result = await queryRAG(query);
+      const recentMessages = messages.slice(-4);
+      const result = await queryRAG(query, recentMessages);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: result.llm_response },

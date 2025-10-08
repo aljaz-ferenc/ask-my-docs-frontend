@@ -1,13 +1,9 @@
 import { motion } from "motion/react";
 import Markdown from "react-markdown";
+import type { AIMessage as TAIMessage } from "@/lib/types";
 
-type AIMessage = {
-  role: string;
-  content: string;
-};
-
-type AIMessageProps = {
-  message: AIMessage;
+export type AIMessageProps = {
+  message: TAIMessage;
 };
 
 export default function AIMessage({ message }: AIMessageProps) {
