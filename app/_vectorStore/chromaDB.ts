@@ -6,7 +6,7 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 const embeddingModel = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
-const vectorStore = new MemoryVectorStore(embeddingModel);
+export const vectorStore = new MemoryVectorStore(embeddingModel);
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkOverlap: 200,
   chunkSize: 1000,
