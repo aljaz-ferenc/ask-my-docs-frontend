@@ -7,6 +7,7 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { uploadFiles } from "@/lib/actions";
 import { cn, formatBytes } from "@/lib/utils";
 
 const ErrorMessageMap = {
@@ -30,6 +31,7 @@ export default function FileUpload() {
       ),
     ]);
   }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
@@ -60,28 +62,13 @@ export default function FileUpload() {
 
   async function onUpload() {
     setIsLoading(true);
-    const formData = new FormData();
-
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
     try {
-      const response = await fetch("http://localhost:8000/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const res = await response.json();
-        throw new Error(res.message || "Upload failed");
-      }
-
+      await uploadFiles(files);
       toast("Files uploaded successfully!");
       setFiles([]);
       setIsCompleted(true);
-    } catch (error: unknown) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
       const message =
         error instanceof Error ? error.message : "Error uploading files";
       toast(message);

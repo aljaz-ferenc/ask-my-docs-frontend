@@ -26,6 +26,9 @@ importers:
       '@radix-ui/react-switch':
         specifier: ^1.2.6
         version: 1.2.6(@types/react-dom@19.2.0(@types/react@19.2.1))(@types/react@19.2.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      appwrite:
+        specifier: ^21.1.0
+        version: 21.1.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1111,6 +1114,9 @@ packages:
   ansi-styles@5.2.0:
     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==}
     engines: {node: '>=10'}
+
+  appwrite@21.1.0:
+    resolution: {integrity: sha512-DKubPNpMP0UdGkD+4TLwO4U9DObfOdk/kHOsI1YOvaMD2gOdYoSdN8uooLhqZ/xr0kR9euwokvFvJBKglPydaQ==}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2841,6 +2847,8 @@ snapshots:
       color-convert: 2.0.1
 
   ansi-styles@5.2.0: {}
+
+  appwrite@21.1.0: {}
 
   argparse@2.0.1: {}
 
