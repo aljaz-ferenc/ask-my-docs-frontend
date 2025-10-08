@@ -45,10 +45,9 @@ export default function ChatPage() {
   }, [messages]);
 
   return (
-    <main className="h-screen flex flex-col gap-3 pb-5">
-      <header className="w-full p-3"></header>
+    <main className=" flex flex-col gap-3 pb-5 !h-[calc(100vh-48px)]">
       <hr />
-      <div className="h-full overflow-y-auto" id="messagesContainer">
+      <div className="h-screen overflow-y-auto" id="messagesContainer">
         <div className="max-w-3xl w-full mx-auto flex flex-col gap-10 ">
           <AnimatePresence>
             {messages.map((message, index) => {

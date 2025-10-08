@@ -183,10 +183,10 @@ export default function FileUpload() {
       {files.length > 0 && <div className="w-full flex justify-center"></div>}
       {!isCompleted ? (
         <Button
-          className="text-white mt-5 text-center flex items-center gap-2 !p-5 cursor-pointer"
+          className="text-white mt-5 text-center flex items-center gap-2 !p-5 cursor-pointer mx-auto"
           type="button"
           onClick={onUpload}
-          disabled={isLoading}
+          disabled={isLoading || files.length === 0}
         >
           {!isLoading ? (
             <>
