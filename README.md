@@ -33,3 +33,8 @@ Ask My Docs uses a **Retrieval-Augmented Generation (RAG)** workflow to answer u
 
 
 This workflow allows Ask My Docs to provide accurate, source-backed answers while handling multiple documents efficiently.
+
+## Try It Out
+There are a few sample files already uploaded (ask the assistant about coffee ☕), but you can freely delete them or add your own. Any files you upload are completely removed from all storage upon deleting.
+
+[Live Page](https://ask-my-docs-frontend.vercel.app/)
