@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -17,13 +16,6 @@ export default function Header() {
 
   return (
     <header className="h-12 border-b border-border w-full flex px-2">
-      {/*<Image*/}
-      {/*  src="/logo.png"*/}
-      {/*  height={30}*/}
-      {/*  width={40}*/}
-      {/*  alt="ask my docs logo"*/}
-      {/*  className="aspect-square rounded-md justify-self-start"*/}
-      {/*/>*/}
       <nav className="flex w-full h-full items-center gap-2 justify-center">
         {links.map((link) => (
           <Link
