@@ -1,7 +1,9 @@
 "use server";
 
 import type { Models } from "appwrite";
+import { revalidatePath } from "next/cache";
 import { storage } from "@/lib/appwrite";
+import { Endpoints } from "@/lib/endpoints";
 import type { AIMessage, HumanMessage } from "@/lib/types";
 
 type QueryResult = {
@@ -13,7 +15,7 @@ export async function queryRAG(
   query: string,
   recentMessages: (AIMessage | HumanMessage)[],
 ) {
-  const res = await fetch("http://localhost:8000/query", {
+  const res = await fetch(Endpoints.query, {
     body: JSON.stringify({ query, recentMessages }),
     headers: {
       "Content-Type": "application/json",
@@ -33,6 +35,7 @@ export async function queryRAG(
 export async function uploadFiles(files: (File & { id: string })[]) {
   const filesIds: string[] = [];
 
+  // upload files to storage
   try {
     files.forEach((file) => {
       const fileId = crypto.randomUUID();
@@ -48,7 +51,8 @@ export async function uploadFiles(files: (File & { id: string })[]) {
     throw new Error("Could not upload files.");
   }
 
-  const res = await fetch("http://localhost:8000/add-files", {
+  // send file ids to backend to insert into db
+  const res = await fetch(Endpoints.files, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -62,6 +66,37 @@ export async function uploadFiles(files: (File & { id: string })[]) {
 
   const data = await res.json();
   return data;
+}
+
+export async function removeFiles(filesIds: string[]) {
+  try {
+    await Promise.all(
+      filesIds.map((id) =>
+        storage.deleteFile({
+          bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
+          fileId: id,
+        }),
+      ),
+    );
+
+    const res = await fetch(Endpoints.files, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ filesIds }),
+    });
+
+    if (!res.ok) {
+      console.error("Error deleting files from DB");
+    }
+    revalidatePath("/files");
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    throw new Error("Could not delete files. Please try again.");
+  }
 }
 
 export async function getFilesList() {
@@ -93,7 +128,7 @@ export async function getFilePreviews() {
   const previews: { fileId: string; name: string; url: string }[] =
     fileList.files.map((file) => {
       const url = storage.getFileView({
-        bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!,
+        bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
         fileId: file.$id,
       });
 

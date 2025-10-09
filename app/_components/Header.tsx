@@ -1,5 +1,9 @@
+"use client";
+
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = [
   { label: "Home", href: "/" },
@@ -9,23 +13,32 @@ const links = [
 ];
 
 export default function Header() {
+  const pathname = usePathname();
+
   return (
     <header className="h-12 border-b border-border w-full flex px-2">
-      <nav className="flex h-full">
-        <Image
-          src="/logo.png"
-          height={30}
-          width={40}
-          alt="ask my docs logo"
-          className="aspect-square rounded-md"
-        />
+      {/*<Image*/}
+      {/*  src="/logo.png"*/}
+      {/*  height={30}*/}
+      {/*  width={40}*/}
+      {/*  alt="ask my docs logo"*/}
+      {/*  className="aspect-square rounded-md justify-self-start"*/}
+      {/*/>*/}
+      <nav className="flex w-full h-full items-center gap-2 justify-center">
         {links.map((link) => (
           <Link
             href={link.href}
             key={link.href}
-            className="h-full grid place-items-center px-4"
+            className="grid place-items-center px-4 h-8 relative"
           >
-            {link.label}
+            {pathname === link.href && (
+              <motion.div
+                layout
+                layoutId="link-bg"
+                className="absolute inset-0 h-full w-full bg-primary rounded-full"
+              />
+            )}
+            <span className="relative z-10">{link.label}</span>
           </Link>
         ))}
       </nav>
