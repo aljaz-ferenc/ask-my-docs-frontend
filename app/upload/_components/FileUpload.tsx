@@ -21,7 +21,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { processFile, removeFileFromStorage } from "@/lib/actions";
+import {
+  processFile,
+  removeFileFromStorage,
+  revalidatePathFromClient,
+} from "@/lib/actions";
 import { uploadFile } from "@/lib/functions/uploadFile";
 import { cn, formatBytes } from "@/lib/utils";
 
@@ -123,6 +127,7 @@ export default function FileUpload() {
         }
       }
     } finally {
+      await revalidatePathFromClient("/files");
       setIsLoading(false);
     }
 

@@ -128,7 +128,6 @@ export async function getFilesList() {
 
 export async function getFilePreviews() {
   const fileList = await getFilesList();
-  console.log("FILE_LIST: ", fileList);
 
   const previews: { fileId: string; name: string; url: string }[] =
     fileList.files.map((file) => {
@@ -145,4 +144,8 @@ export async function getFilePreviews() {
     });
 
   return previews;
+}
+
+export async function revalidatePathFromClient(path: string) {
+  revalidatePath(path);
 }

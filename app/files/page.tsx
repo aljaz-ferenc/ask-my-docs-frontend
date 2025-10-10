@@ -5,7 +5,6 @@ import { getFilePreviews } from "@/lib/actions";
 
 export default async function FilesPage() {
   const previews = await getFilePreviews();
-  console.log("PREVIEWS: ", previews);
 
   return (
     <main className="flex-1">
