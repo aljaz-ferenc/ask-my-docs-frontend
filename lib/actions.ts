@@ -128,6 +128,7 @@ export async function getFilesList() {
 
 export async function getFilePreviews() {
   const fileList = await getFilesList();
+  console.log("FILE_LIST: ", fileList);
 
   const previews: { fileId: string; name: string; url: string }[] =
     fileList.files.map((file) => {

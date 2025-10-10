@@ -1,6 +1,14 @@
 "use client";
 
-import { Check, CircleX, CloudUpload, File, X } from "lucide-react";
+import {
+  Check,
+  CircleX,
+  CloudUpload,
+  File,
+  RotateCcw,
+  Trash,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -8,6 +16,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { processFile, removeFileFromStorage } from "@/lib/actions";
 import { uploadFile } from "@/lib/functions/uploadFile";
 import { cn, formatBytes } from "@/lib/utils";
@@ -71,13 +84,18 @@ export default function FileUpload() {
     maxSize: 5 * 1024 * 1024,
   });
 
-  async function onUpload() {
+  async function onUpload(fileId?: string) {
+    setFailed([]);
     setIsLoading(true);
     const failedFiles = [];
     const completedFiles = [];
 
     try {
       for (const file of files) {
+        if (completed.includes(file.id)) continue;
+        if (fileId) {
+          if (file.id !== fileId) continue;
+        }
         try {
           const uploadResult = await uploadFile(file);
 
@@ -114,9 +132,11 @@ export default function FileUpload() {
       );
     }
 
-    toast(
-      `${completedFiles.length} ${completedFiles.length === 1 ? "file" : "files"} processed successfully!`,
-    );
+    if (completedFiles.length) {
+      toast(
+        `${completedFiles.length} ${completedFiles.length === 1 ? "file" : "files"} processed successfully!`,
+      );
+    }
   }
 
   return (
@@ -192,8 +212,8 @@ export default function FileUpload() {
                   </div>
 
                   {!isLoading &&
-                    completed.includes(file.id) &&
-                    failed.includes(file.id) && (
+                    !completed.includes(file.id) &&
+                    !failed.includes(file.id) && (
                       <div className="flex gap-3 items-baseline">
                         <span className="text-muted-foreground ml-auto">
                           {formatBytes(file.size, 2)}
@@ -215,7 +235,52 @@ export default function FileUpload() {
                     !completed.includes(file.id) &&
                     !failed.includes(file.id) && <Spinner />}
                   {completed.includes(file.id) && <Check color="green" />}
-                  {failed.includes(file.id) && <X />}
+                  {failed.includes(file.id) && (
+                    <>
+                      <X
+                        color="var(--color-destructive)"
+                        className="group-hover:hidden ml-auto"
+                      />
+                      <div className="flex gap-4">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-muted-foreground text-xs hidden group-hover:block hover:underline"
+                              onClick={() => onUpload(file.id)}
+                            >
+                              <RotateCcw
+                                size={15}
+                                className="hover:text-white cursor-pointer"
+                              />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Retry</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-muted-foreground text-xs hidden group-hover:block  hover:underline"
+                              onClick={() => {
+                                console.log(file.id);
+                                setFiles((prev) =>
+                                  prev.filter((f) => f.id !== file.id),
+                                );
+                              }}
+                            >
+                              <Trash
+                                size={15}
+                                className="hover:text-white cursor-pointer"
+                              />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Remove</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <hr />
               </div>
@@ -227,7 +292,7 @@ export default function FileUpload() {
         onClick={
           allFIlesAttempted && completed.length > 0
             ? () => router.push("/chat")
-            : onUpload
+            : () => onUpload()
         }
         disabled={isLoading || files.length === 0}
         className="max-w-50 w-full mt-3 text-white cursor-pointer"
