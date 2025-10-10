@@ -7,7 +7,7 @@ export default async function FilesPage() {
   const previews = await getFilePreviews();
 
   return (
-    <main className="flex-1 min-h-screen">
+    <main className="flex-1">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 h-full">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>

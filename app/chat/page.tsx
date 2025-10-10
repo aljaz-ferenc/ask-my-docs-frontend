@@ -69,28 +69,30 @@ export default function ChatPage() {
         hasFiles={files.length > 0}
         isLoading={isLoading}
       />
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSendMessage(userMessage);
-        }}
-        className="max-w-3xl w-full mx-auto mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14"
-      >
-        <input
-          className="w-full h-full border-none outline-none focus-visible:!border-none focus-visible:!outline-none focus-visible:!shadow-none focus-visible:!ring-none"
-          placeholder="Ask about your docs..."
-          onChange={(e) => setUserMessage(e.target.value)}
-          value={userMessage}
-          disabled={isThinking || files.length === 0}
-        />
-        <button
-          type="submit"
-          className="hover:bg-primary/80 cursor-pointer bg-primary text-white h-[60%] aspect-square grid place-items-center rounded-full"
-          disabled={isThinking || files.length === 0}
+      {files.length > 0 && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSendMessage(userMessage);
+          }}
+          className="max-w-3xl w-full mx-auto mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14"
         >
-          <SendHorizontal size={18} />
-        </button>
-      </form>
+          <input
+            className="w-full h-full border-none outline-none focus-visible:!border-none focus-visible:!outline-none focus-visible:!shadow-none focus-visible:!ring-none"
+            placeholder="Ask about your docs..."
+            onChange={(e) => setUserMessage(e.target.value)}
+            value={userMessage}
+            disabled={isThinking || files.length === 0}
+          />
+          <button
+            type="submit"
+            className="hover:bg-primary/80 cursor-pointer bg-primary text-white h-[60%] aspect-square grid place-items-center rounded-full"
+            disabled={isThinking || files.length === 0}
+          >
+            <SendHorizontal size={18} />
+          </button>
+        </form>
+      )}
     </main>
   );
 }
