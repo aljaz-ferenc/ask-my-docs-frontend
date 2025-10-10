@@ -1,7 +1,7 @@
 # AskMyDocs
 ## AI Document Query Assistant
 
-Ask My Docs is an intelligent document assistant that allows users to upload and interact with their personal or organizational documents using natural language. It leverages retrieval-augmented generation (RAG) to deliver precise, source-cited answers directly from uploaded files — no more manual searching through PDFs, Word docs, or spreadsheets.
+Ask My Docs is an intelligent document assistant that allows users to upload and interact with their personal or organizational documents using natural language. It uses retrieval-augmented generation (RAG) to deliver precise, source-cited answers directly from uploaded files — no more manual searching through PDFs, Word docs, or spreadsheets.
 
 ### Tech Stack
 **Backend**: Python, FastAPI, LangChain, ChromaDB, Appwrite
@@ -33,6 +33,25 @@ Ask My Docs uses a **Retrieval-Augmented Generation (RAG)** workflow to answer u
 
 
 This workflow allows Ask My Docs to provide accurate, source-backed answers while handling multiple documents efficiently.
+
+
+
+## How to Use AskMyDocs
+Navigate to the `Files` page and add some and click `Upload Files`. 
+
+<img style="max-width: 400px" src='/public/screenshots/no-files.png'/>
+
+You will be taken to a page where you can upload your files by dragging and dropping them on the dropzone. (Currently only `.txt` and `.pdf` files are supported, more coming soon!)
+
+<img style="max-width: 400px" src='/public/screenshots/upload.png'/>
+
+To upload and process the files click `Process Files`. Your files will be stored in a file storage, processed and stored as embeddings in a vector store.
+
+When the files are ready click `Go to Chat`.
+
+You will be greeted by a friendly AI assistant that is ready to answer any question about your documents.
+
+<img style="max-width: 400px" src='/public/screenshots/chat.png'/>
 
 ## Try It Out
 There are a few sample files already uploaded (ask the assistant about coffee ☕), but you can freely delete them or add your own. Any files you upload are completely removed from all storage upon deleting.

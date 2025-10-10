@@ -15,8 +15,8 @@ type MessagesProps = {
 
 export default function Messages({ messages, isThinking }: MessagesProps) {
   return (
-    <div className="h-screen overflow-y-auto" id="messagesContainer">
-      <div className="max-w-3xl w-full mx-auto flex flex-col gap-10 ">
+    <div className="h-screen overflow-y-auto " id="messagesContainer">
+      <div className="max-w-3xl w-full mx-auto flex flex-col gap-10">
         <BotSayHi />
         <AnimatePresence>
           {messages.map((message, index) => {

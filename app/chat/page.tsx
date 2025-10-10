@@ -61,7 +61,7 @@ export default function ChatPage() {
   }, [messages]);
 
   return (
-    <main className=" flex flex-col gap-3 !h-[calc(100vh-48px)] container">
+    <main className=" flex flex-col gap-3 !h-[calc(100vh-48px)]">
       <MainComponent
         messages={messages}
         isThinking={isThinking}
