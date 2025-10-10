@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function NoMessages() {
+export default function BotSayHi() {
   return (
     <div className="text-center h-full">
       <Image

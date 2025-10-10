@@ -23,7 +23,7 @@ export default function FileItem({ file }: FileItemProps) {
     try {
       setIsDeleting(true);
       await removeFiles([file.fileId]);
-      toast("Files deleted successfully!");
+      toast("File deleted successfully!");
     } catch (err) {
       console.error(err);
       toast("Could not delete the file. Try again.");

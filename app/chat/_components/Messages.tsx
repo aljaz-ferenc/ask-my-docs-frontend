@@ -1,6 +1,7 @@
 import { AnimatePresence } from "motion/react";
 import { BeatLoader } from "react-spinners";
 import AIMessage from "@/app/chat/_components/AIMessage";
+import BotSayHi from "@/app/chat/_components/BotSayHi";
 import HumanMessage from "@/app/chat/_components/HumanMessage";
 import type {
   AIMessage as TAIMessage,
@@ -16,6 +17,7 @@ export default function Messages({ messages, isThinking }: MessagesProps) {
   return (
     <div className="h-screen overflow-y-auto" id="messagesContainer">
       <div className="max-w-3xl w-full mx-auto flex flex-col gap-10 ">
+        <BotSayHi />
         <AnimatePresence>
           {messages.map((message, index) => {
             if (message.role === "user") {

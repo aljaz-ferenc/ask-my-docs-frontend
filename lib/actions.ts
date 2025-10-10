@@ -1,6 +1,5 @@
 "use server";
 
-import type { Models } from "appwrite";
 import { revalidatePath } from "next/cache";
 import { storage } from "@/lib/appwrite";
 import { Endpoints } from "@/lib/endpoints";
@@ -32,39 +31,46 @@ export async function queryRAG(
   return data;
 }
 
-export async function uploadFiles(files: (File & { id: string })[]) {
-  const filesIds: string[] = [];
-
-  // upload files to storage
+export async function processFile(fileId: string) {
   try {
-    files.forEach((file) => {
-      const fileId = crypto.randomUUID();
-      filesIds.push(fileId);
-      storage.createFile({
-        bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
-        fileId: fileId,
-        file: file,
-      });
+    const res = await fetch(Endpoints.files, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ filesIds: [fileId] }),
     });
-  } catch (err) {
-    console.error("Error uploading files to Appwrite: ", err);
-    throw new Error("Could not upload files.");
-  }
 
-  // send file ids to backend to insert into db
+    if (!res.ok) {
+      throw new Error("Could not upload files.");
+    }
+
+    const data: { status: "success" | "error"; fileId: string } =
+      await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error processing files:", error);
+    await removeFiles([fileId]);
+    revalidatePath("/files");
+    throw new Error("Could not process file...");
+  }
+}
+
+export async function removeFileFromDB(fileId: string) {
   const res = await fetch(Endpoints.files, {
-    method: "POST",
+    method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ filesIds }),
+    body: JSON.stringify({ filesIds: [fileId] }),
   });
 
   if (!res.ok) {
-    throw new Error("Could not add files.");
+    console.error("Error deleting files from DB");
   }
-
-  const data = await res.json();
+  revalidatePath("/files");
+  const data: { status: "success" | "error"; fileId: string } =
+    await res.json();
   return data;
 }
 
@@ -99,27 +105,25 @@ export async function removeFiles(filesIds: string[]) {
   }
 }
 
-export async function getFilesList() {
-  const result = await storage.listFiles({
-    bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
-  });
-  return result;
+export async function removeFileFromStorage(fileId: string) {
+  try {
+    await storage.deleteFile({
+      bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
+      fileId,
+    });
+  } catch (err: unknown) {
+    console.error("Error removing files from storage:", err);
+    if (err instanceof Error) {
+      throw new Error(err.message);
+    }
+    throw new Error("Error removing files from storage");
+  }
 }
 
-export async function getFiles() {
-  const fileList = await getFilesList();
-
-  const files: Models.File[] = await Promise.all(
-    fileList.files.map(async (file) => {
-      const f = await storage.getFile({
-        bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
-        fileId: file.$id,
-      });
-      return f;
-    }),
-  );
-
-  return files;
+export async function getFilesList() {
+  return await storage.listFiles({
+    bucketId: process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID as string,
+  });
 }
 
 export async function getFilePreviews() {

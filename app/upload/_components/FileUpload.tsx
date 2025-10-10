@@ -1,13 +1,15 @@
 "use client";
 
-import { CircleX, CloudUpload, File, Play } from "lucide-react";
+import { Check, CircleX, CloudUpload, File, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { uploadFiles } from "@/lib/actions";
+import { Spinner } from "@/components/ui/spinner";
+import { processFile, removeFileFromStorage } from "@/lib/actions";
+import { uploadFile } from "@/lib/functions/uploadFile";
 import { cn, formatBytes } from "@/lib/utils";
 
 const ErrorMessageMap = {
@@ -21,6 +23,8 @@ export default function FileUpload() {
   const [errors, setErrors] = useState<{ message: string; fileName: string }[]>(
     [],
   );
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [failed, setFailed] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prev) => [
@@ -30,6 +34,14 @@ export default function FileUpload() {
       ),
     ]);
   }, []);
+
+  const allFilesUploaded =
+    files.every((f) => completed.includes(f.id)) && files.length > 0;
+  const allFIlesAttempted =
+    files.every((f) => completed.includes(f.id) || failed.includes(f.id)) &&
+    files.length > 0;
+  const allFilesFailed =
+    files.every((f) => failed.includes(f.id)) && files.length > 0;
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -61,19 +73,50 @@ export default function FileUpload() {
 
   async function onUpload() {
     setIsLoading(true);
+    const failedFiles = [];
+    const completedFiles = [];
+
     try {
-      await uploadFiles(files);
-      toast("Files uploaded successfully!");
-      setFiles([]);
-      router.push("/files");
-    } catch (error) {
-      console.error(error);
-      const message =
-        error instanceof Error ? error.message : "Error uploading files";
-      toast(message);
+      for (const file of files) {
+        try {
+          const uploadResult = await uploadFile(file);
+
+          if (uploadResult.status !== "success") {
+            setFailed((prev) => [...prev, uploadResult.fileId]);
+            throw new Error("Could not upload file");
+          }
+
+          const processResult = await processFile(uploadResult.fileId);
+
+          if (processResult.status === "success") {
+            setCompleted((prev) => [...prev, processResult.fileId]);
+            completedFiles.push(file.id);
+            console.log("completed: ", file.name);
+            continue;
+          }
+
+          await removeFileFromStorage(file.id);
+          failedFiles.push(processResult.fileId);
+          setFailed((prev) => [...prev, processResult.fileId]);
+        } catch (err) {
+          if (err) {
+            console.error(`Error uploading or processing file: ${err}`);
+          }
+        }
+      }
     } finally {
       setIsLoading(false);
     }
+
+    if (failedFiles.length) {
+      toast(
+        `Failed to upload ${failedFiles.length} ${failedFiles.length === 1 ? "file" : "files"}.`,
+      );
+    }
+
+    toast(
+      `${completedFiles.length} ${completedFiles.length === 1 ? "file" : "files"} processed successfully!`,
+    );
   }
 
   return (
@@ -142,21 +185,37 @@ export default function FileUpload() {
             <h3 className="text-xl font-bold mb-5">Uploaded Files</h3>
             {files.map((file) => (
               <div className="group" key={file.id}>
-                <div className="flex gap-2 items-center py-3">
-                  <File className="text-muted-foreground" />
-                  <p>{file.name}</p>
-                  <span className="text-muted-foreground ml-auto">
-                    {formatBytes(file.size, 2)}
-                  </span>
-                  <Button
-                    variant="link"
-                    className="text-muted-foreground/50 text-xs hover:text-destructive cursor-pointer"
-                    onClick={() =>
-                      setFiles((prev) => prev.filter((f) => f.id !== file.id))
-                    }
-                  >
-                    Remove
-                  </Button>
+                <div className="flex gap-2 justify-between items-center py-3">
+                  <div className="flex items-center gap-2">
+                    <File className="text-muted-foreground" />
+                    <p className="mr-auto">{file.name}</p>
+                  </div>
+
+                  {!isLoading &&
+                    completed.includes(file.id) &&
+                    failed.includes(file.id) && (
+                      <div className="flex gap-3 items-baseline">
+                        <span className="text-muted-foreground ml-auto">
+                          {formatBytes(file.size, 2)}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-muted-foreground/50 text-xs hover:text-destructive cursor-pointer font-semibold"
+                          onClick={() =>
+                            setFiles((prev) =>
+                              prev.filter((f) => f.id !== file.id),
+                            )
+                          }
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  {isLoading &&
+                    !completed.includes(file.id) &&
+                    !failed.includes(file.id) && <Spinner />}
+                  {completed.includes(file.id) && <Check color="green" />}
+                  {failed.includes(file.id) && <X />}
                 </div>
                 <hr />
               </div>
@@ -164,22 +223,48 @@ export default function FileUpload() {
           </div>
         )}
       </div>
-      {files.length > 0 && <div className="w-full flex justify-center"></div>}
       <Button
-        className="text-white mt-5 text-center flex items-center gap-2 !p-5 cursor-pointer mx-auto"
-        type="button"
-        onClick={onUpload}
+        onClick={
+          allFIlesAttempted && completed.length > 0
+            ? () => router.push("/chat")
+            : onUpload
+        }
         disabled={isLoading || files.length === 0}
+        className="max-w-50 w-full mt-3 text-white cursor-pointer"
       >
-        {!isLoading ? (
-          <>
-            <Play />
-            Process Files
-          </>
-        ) : (
-          <span>Uploading files...</span>
-        )}
+        <ActionButtonContent
+          allFilesCompleted={allFilesUploaded}
+          allFilesFailed={allFilesFailed}
+          allFilesAttemped={allFIlesAttempted}
+          isLoading={isLoading}
+        />
       </Button>
     </div>
   );
+}
+
+function ActionButtonContent({
+  allFilesFailed,
+  allFilesCompleted,
+  allFilesAttemped,
+  isLoading,
+}: {
+  isLoading: boolean;
+  allFilesCompleted: boolean;
+  allFilesAttemped: boolean;
+  allFilesFailed: boolean;
+}) {
+  if (isLoading) {
+    return <Spinner color="white" />;
+  }
+
+  if (allFilesFailed) {
+    return <span>Retry</span>;
+  }
+
+  if (allFilesAttemped || allFilesCompleted) {
+    return <span>Go to Chat</span>;
+  }
+
+  return <span>Process Files</span>;
 }

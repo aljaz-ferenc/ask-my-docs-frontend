@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import Loading from "@/app/_components/Loading";
 import Messages from "@/app/chat/_components/Messages";
 import NoFiles from "@/app/chat/_components/NoFiles";
-import NoMessages from "@/app/chat/_components/NoMessages";
 import { getFilePreviews, queryRAG } from "@/lib/actions";
 import type {
   AIMessage as TAIMessage,
@@ -112,10 +111,6 @@ function MainComponent({
   }
   if (!hasFiles) {
     return <NoFiles />;
-  }
-
-  if (!messages.length) {
-    return <NoMessages />;
   }
 
   return <Messages messages={messages} isThinking={isThinking} />;
