@@ -8,12 +8,10 @@ export default function BotSayHi() {
         height={300}
         alt="bot logo"
         src="/logo-no-bg.png"
-        className="mx-auto mt-20"
+        className="mx-auto md:mt-20"
       />
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Hi there!
-      </h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-8">
+      <h2 className="text-2xl font-bold text-white mb-2">Hi there!</h2>
+      <p className="text-muted-foreground mb-8">
         I'm your AI assistant, ready to help you with the content of your
         uploaded files.
       </p>

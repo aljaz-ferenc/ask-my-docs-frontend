@@ -8,7 +8,6 @@ const links = [
   { label: "Home", href: "/" },
   { label: "Chat", href: "/chat" },
   { label: "Files", href: "/files" },
-  { label: "About", href: "/about" },
 ];
 
 export default function Header() {

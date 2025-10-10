@@ -61,8 +61,7 @@ export default function ChatPage() {
   }, [messages]);
 
   return (
-    <main className=" flex flex-col gap-3 pb-5 !h-[calc(100vh-48px)]">
-      <hr />
+    <main className=" flex flex-col gap-3 !h-[calc(100vh-48px)] container">
       <MainComponent
         messages={messages}
         isThinking={isThinking}
@@ -75,7 +74,7 @@ export default function ChatPage() {
             e.preventDefault();
             onSendMessage(userMessage);
           }}
-          className="max-w-3xl w-full mx-auto mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14"
+          className="max-w-3xl w-full mx-auto mt-auto flex bg-slate-700 rounded-xl items-center pl-4 pr-3 h-14 mb-3"
         >
           <input
             className="w-full h-full border-none outline-none focus-visible:!border-none focus-visible:!outline-none focus-visible:!shadow-none focus-visible:!ring-none"
