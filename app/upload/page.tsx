@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import FileUpload from "@/app/upload/_components/FileUpload";
+
+export const metadata: Metadata = {
+  title: "AskMyDocs - Upload Files",
+  description: "Upload your files.",
+};
 
 export default function UploadPage() {
   return (

@@ -1,7 +1,13 @@
 import { File, Plus } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import FileItem from "@/app/files/_components/FileItem";
 import { getFilePreviews } from "@/lib/actions";
+
+export const metadata: Metadata = {
+  title: "AskMyDocs - All Files",
+  description: "Upload your files",
+};
 
 export default async function FilesPage() {
   const previews = await getFilePreviews();
