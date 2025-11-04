@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { storage } from "@/lib/appwrite";
 import { Endpoints } from "@/lib/endpoints";
 import type { AIMessage, HumanMessage } from "@/lib/types";
@@ -51,7 +51,7 @@ export async function processFile(fileId: string) {
   } catch (error) {
     console.error("Error processing files:", error);
     await removeFiles([fileId]);
-    revalidatePath("/files");
+    updateTag("files-list");
     throw new Error("Could not process file...");
   }
 }
@@ -142,7 +142,6 @@ export async function getFilePreviews() {
         url,
       };
     });
-
   return previews;
 }
 

@@ -10,7 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -113,7 +113,6 @@ export default function FileUpload() {
           if (processResult.status === "success") {
             setCompleted((prev) => [...prev, processResult.fileId]);
             completedFiles.push(file.id);
-            console.log("completed: ", file.name);
             continue;
           }
 
