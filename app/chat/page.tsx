@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import ChatInterface from "@/app/chat/_components/ChatInterface";
+import { Suspense } from "react";
+import Loading from "@/app/_components/Loading";
+import MainComponent from "@/app/chat/_components/MainChatComponent";
 
 export const metadata: Metadata = {
   title: "AskMyDocs - Chat",
@@ -7,5 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function ChatPage() {
-  return <ChatInterface />;
+  return (
+    <main className="flex flex-col gap-3 !h-[calc(100vh-48px)]">
+      <Suspense fallback={<Loading title="Just a sec..." />}>
+        <MainComponent />
+      </Suspense>
+    </main>
+  );
 }

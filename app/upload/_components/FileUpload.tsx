@@ -9,6 +9,7 @@ import {
   Trash,
   X,
 } from "lucide-react";
+import { updateTag } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -43,6 +44,7 @@ export default function FileUpload() {
   const [completed, setCompleted] = useState<string[]>([]);
   const [failed, setFailed] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((prev) => [
       ...prev,
@@ -127,6 +129,7 @@ export default function FileUpload() {
       }
     } finally {
       await revalidatePathFromClient("/files");
+      await revalidatePathFromClient("/chat");
       setIsLoading(false);
     }
 
@@ -142,6 +145,10 @@ export default function FileUpload() {
       );
     }
   }
+
+  useEffect(() => {
+    return () => setFiles([]);
+  }, []);
 
   return (
     <div>
