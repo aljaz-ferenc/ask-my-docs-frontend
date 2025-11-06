@@ -53,7 +53,7 @@ export default function Messages() {
   return (
     <div className="h-full flex flex-col gap-2 justify-between">
       <div
-        className="overflow-y-auto w-full mx-auto flex flex-col gap-10"
+        className="overflow-y-auto w-full mx-auto flex flex-col gap-10 p-2"
         id="messagesContainer"
       >
         <BotSayHi />
@@ -70,7 +70,7 @@ export default function Messages() {
           </div>
         </AnimatePresence>
       </div>
-      <div>
+      <div className='p-2'>
         <hr className="my-4" />
         <form
           onSubmit={(e) => {

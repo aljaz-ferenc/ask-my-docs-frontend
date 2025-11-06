@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function FilesPage() {
   return (
     <main className="flex-1">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 h-full">
+      <div className="mx-auto max-w-4xl px-3 sm:px-6 lg:px-8 py-12 h-full">
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
