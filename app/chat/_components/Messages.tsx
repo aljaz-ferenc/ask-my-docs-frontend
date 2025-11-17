@@ -1,5 +1,8 @@
 "use client";
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+if (!BASE_URL) throw new Error("Missing BASE_URL env");
+
 import { SendHorizontal } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
@@ -9,7 +12,6 @@ import { toast } from "sonner";
 import AIMessage from "@/app/chat/_components/AIMessage";
 import BotSayHi from "@/app/chat/_components/BotSayHi";
 import HumanMessage from "@/app/chat/_components/HumanMessage";
-import { queryRAG } from "@/lib/actions";
 import type {
   AIMessage as TAIMessage,
   HumanMessage as THumanMessage,
@@ -27,25 +29,50 @@ export default function Messages() {
 
     const recentMessages = messages.slice(-4);
 
-    queryRAG(query, recentMessages)
-      .then((result) => {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: result.llm_response },
-        ]);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast("Something went wrong. Try again.");
-      })
-      .finally(() => setIsThinking(false));
+    const es = new EventSource(
+      `http://localhost:8000/query?query=${query}&recent_messages=${encodeURIComponent(
+        JSON.stringify(recentMessages),
+      )}`,
+    );
+
+    es.onmessage = (e) => {
+      setIsThinking(false);
+      if (e.data === "[DONE]") {
+        setIsThinking(false);
+        es.close();
+        return;
+      }
+
+      setMessages((prev) => {
+        const lastMessage = prev.at(-1);
+        let assistantMessage = "";
+
+        if (lastMessage?.role !== "assistant") {
+          return [...prev, { role: "assistant", content: e.data }];
+        }
+
+        assistantMessage = lastMessage.content + e.data;
+
+        return [
+          ...prev.slice(0, prev.length - 1),
+          { role: "assistant", content: assistantMessage },
+        ];
+      });
+    };
+
+    es.onerror = (err) => {
+      toast("Something went streaming data... Please try again.");
+      console.error("SSE error:", err);
+      setIsThinking(false);
+      es.close();
+    };
   }
 
   useEffect(() => {
     if (!messages) return;
     animateScroll.scrollToBottom({
       containerId: "messagesContainer",
-      duration: 300,
+      duration: 0,
       smooth: true,
     });
   }, [messages]);
@@ -70,7 +97,7 @@ export default function Messages() {
           </div>
         </AnimatePresence>
       </div>
-      <div className='p-2'>
+      <div className="p-2">
         <hr className="my-4" />
         <form
           onSubmit={(e) => {
