@@ -39,8 +39,17 @@ export default function Messages() {
     );
 
     es.addEventListener("metadata", (e) => {
-      const metadata = JSON.parse(e.data);
-      sourcesRef.current = metadata;
+      const metadata = JSON.parse(e.data) as SourceFileMetadata[];
+
+      const duplicates = new Set<SourceFileMetadata["file_id"]>();
+      const deduped = metadata.filter((md) => {
+        if (duplicates.has(md.file_id)) return false;
+
+        duplicates.add(md.file_id);
+        return true;
+      });
+
+      sourcesRef.current = deduped;
     });
 
     es.addEventListener("done", () => {
