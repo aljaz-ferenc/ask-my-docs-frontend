@@ -16,9 +16,21 @@ export default function AIMessage({ message }: AIMessageProps) {
       <span className="text-xs self-start text-muted-foreground">
         Assistant
       </span>
-      <div className="text-white py-2 px-4 bg-slate-700 rounded-xl">
+      <div className="text-white py-2 px-4 bg-slate-700 rounded-xl text-sm">
         <Markdown>{message.content}</Markdown>
       </div>
+      {message.sources && message.sources.length > 0 && (
+        <div className="text-xs self-start mt-1 text-muted-foreground">
+          <span className="text-white">
+            {message.sources.length > 1 ? "Sources" : "Source"}
+          </span>
+          <ul className="flex gap-3 w-full flex-wrap">
+            {message.sources.map((source, index) => (
+              <li key={`source-${index + 1}`}>{source.file_name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </motion.div>
   );
 }

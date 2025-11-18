@@ -9,6 +9,7 @@ export default function BotSayHi() {
         alt="bot logo"
         src="/logo-no-bg.png"
         className="mx-auto md:mt-20"
+        loading="eager"
       />
       <h2 className="text-2xl font-bold text-white mb-2">Hi there!</h2>
       <p className="text-muted-foreground mb-8">
