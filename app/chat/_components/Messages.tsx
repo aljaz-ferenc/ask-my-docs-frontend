@@ -35,34 +35,38 @@ export default function Messages() {
       )}`,
     );
 
-    es.onmessage = (e) => {
+    es.addEventListener("metadata", (e) => {
+      const metadata = JSON.parse(e.data);
+      console.log("METADATA:", metadata);
+    });
+
+    es.addEventListener("done", (e) => {
+      console.log(e.data);
       setIsThinking(false);
-      if (e.data === "[DONE]") {
-        setIsThinking(false);
-        es.close();
-        return;
-      }
+      es.close();
+      return;
+    });
+
+    es.addEventListener("token", (e) => {
+      setIsThinking(false);
 
       setMessages((prev) => {
-        const lastMessage = prev.at(-1);
-        let assistantMessage = "";
+        const lastMessage = prev[prev.length - 1];
 
-        if (lastMessage?.role !== "assistant") {
+        if (!lastMessage || lastMessage.role !== "assistant") {
           return [...prev, { role: "assistant", content: e.data }];
         }
 
-        assistantMessage = lastMessage.content + e.data;
-
         return [
-          ...prev.slice(0, prev.length - 1),
-          { role: "assistant", content: assistantMessage },
+          ...prev.slice(0, -1),
+          { role: "assistant", content: lastMessage.content + e.data },
         ];
       });
-    };
+    });
 
     es.onerror = (err) => {
-      toast("Something went streaming data... Please try again.");
       console.error("SSE error:", err);
+      toast("Streaming failed. Try again.");
       setIsThinking(false);
       es.close();
     };
