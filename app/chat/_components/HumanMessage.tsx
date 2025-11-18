@@ -13,7 +13,7 @@ export default function HumanMessage({ message }: HumanMessageProps) {
       className="w-fit max-w-[80%] flex flex-col gap-1 self-end"
     >
       <span className="text-xs self-end text-muted-foreground">You</span>
-      <div className="text-white bg-primary  py-2 px-4 rounded-xl">
+      <div className="text-white bg-primary py-2 px-4 rounded-xl text-sm">
         {message.content}
       </div>
     </motion.div>

@@ -5,7 +5,7 @@ if (!BASE_URL) throw new Error("Missing BASE_URL env");
 
 import { SendHorizontal } from "lucide-react";
 import { AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animateScroll } from "react-scroll";
 import { BeatLoader } from "react-spinners";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import AIMessage from "@/app/chat/_components/AIMessage";
 import BotSayHi from "@/app/chat/_components/BotSayHi";
 import HumanMessage from "@/app/chat/_components/HumanMessage";
 import type {
+  SourceFileMetadata,
   AIMessage as TAIMessage,
   HumanMessage as THumanMessage,
 } from "@/lib/types";
@@ -21,11 +22,13 @@ export default function Messages() {
   const [messages, setMessages] = useState<(TAIMessage | THumanMessage)[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const sourcesRef = useRef<SourceFileMetadata[] | null>(null);
 
   function onSendMessage(query: string) {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setUserMessage("");
     setIsThinking(true);
+    sourcesRef.current = null;
 
     const recentMessages = messages.slice(-4);
 
@@ -35,34 +38,48 @@ export default function Messages() {
       )}`,
     );
 
-    es.onmessage = (e) => {
+    es.addEventListener("metadata", (e) => {
+      const metadata = JSON.parse(e.data);
+      sourcesRef.current = metadata;
+    });
+
+    es.addEventListener("done", () => {
       setIsThinking(false);
-      if (e.data === "[DONE]") {
-        setIsThinking(false);
-        es.close();
-        return;
-      }
+      es.close();
+      return;
+    });
+
+    es.addEventListener("token", (e) => {
+      setIsThinking(false);
 
       setMessages((prev) => {
-        const lastMessage = prev.at(-1);
-        let assistantMessage = "";
+        const lastMessage = prev[prev.length - 1];
 
-        if (lastMessage?.role !== "assistant") {
-          return [...prev, { role: "assistant", content: e.data }];
+        if (!lastMessage || lastMessage.role !== "assistant") {
+          return [
+            ...prev,
+            {
+              role: "assistant",
+              content: e.data,
+              sources: sourcesRef.current,
+            } as TAIMessage,
+          ];
         }
 
-        assistantMessage = lastMessage.content + e.data;
-
         return [
-          ...prev.slice(0, prev.length - 1),
-          { role: "assistant", content: assistantMessage },
+          ...prev.slice(0, -1),
+          {
+            role: "assistant",
+            content: lastMessage.content + e.data,
+            sources: sourcesRef.current,
+          } as TAIMessage,
         ];
       });
-    };
+    });
 
     es.onerror = (err) => {
-      toast("Something went streaming data... Please try again.");
       console.error("SSE error:", err);
+      toast("Streaming failed. Try again.");
       setIsThinking(false);
       es.close();
     };
