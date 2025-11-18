@@ -30,7 +30,7 @@ export default function Messages() {
     const recentMessages = messages.slice(-4);
 
     const es = new EventSource(
-      `${BASE_URL}/query?query=${query}&recent_messages=${encodeURIComponent(
+      `${BASE_URL}/query/?query=${query}&recent_messages=${encodeURIComponent(
         JSON.stringify(recentMessages),
       )}`,
     );
