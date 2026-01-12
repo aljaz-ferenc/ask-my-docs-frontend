@@ -10,6 +10,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@langchain/classic": "^1.0.8",
     "@langchain/community": "^1.1.3",
     "@langchain/core": "^1.1.12",
     "@langchain/openai": "^1.2.1",
